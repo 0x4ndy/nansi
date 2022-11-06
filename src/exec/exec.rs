@@ -78,7 +78,7 @@ pub fn execute(nansi_file: &NansiFile) -> Result<(), Box<dyn Error>>{
                     } else {
                         String::from_utf8(result.stderr)?
                     };
-                    println!("{}", output);
+                    print_output(&output);
                 }
             },
             Err(e) => {

@@ -13,7 +13,8 @@
         },
         {
             "id": "asd",
-            "exec": "aaa"
+            "exec": "aaa",
+            "print_output": true
         },
         {
             "id": "bash",
@@ -21,7 +22,8 @@
             "args": [
                 "-c",
                 "ls -ltra | grep README"
-            ]
+            ],
+            "print_output": true
         }
     ]
 }
