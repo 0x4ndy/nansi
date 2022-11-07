@@ -4,7 +4,6 @@ mod exec;
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    
     let args = match args::Args::new() {
         Ok(args) => args,
         Err(e) => {

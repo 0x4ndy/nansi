@@ -5,7 +5,6 @@
             "exec": "ls"
         },
         {
-            "label": "l2",
             "exec": "ls",
             "args": [
                 "-12345"
@@ -17,7 +16,15 @@
             "print_output": true
         },
         {
-            "label": "bash",
+            "label": "ls",
+            "exec": "ls"
+        },
+        {
+            "label": "asd",
+            "exec": "aaa",
+            "print_output": true
+        },
+        {
             "exec": "/bin/bash",
             "args": [
                 "-c",
