@@ -5,6 +5,13 @@
             "exec": "ls"
         },
         {
+            "label": "lsls",
+            "exec": "ls",
+            "prerequisites": [
+                "bash"
+            ]
+        },
+        {
             "label": "l2",
             "exec": "ls",
             "args": [
@@ -14,7 +21,10 @@
         {
             "label": "asd",
             "exec": "aaa",
-            "print_output": true
+            "print_output": true,
+            "prerequisites": [
+                "ls"
+            ]
         },
         {
             "label": "bash",
@@ -23,7 +33,13 @@
                 "-c",
                 "ls -ltra | grep README"
             ],
-            "print_output": true
+            "print_output": true,
+            "prerequisites": [
+                "l2"
+            ]
+        },
+        {
+            "exec": "ls"
         }
     ]
 }
