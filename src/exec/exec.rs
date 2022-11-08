@@ -107,7 +107,7 @@ pub fn execute(nansi_file: &NansiFile) -> Result<(), Box<dyn Error>> {
                 String::from(format!("[{}][{}]", idx.to_string(), &exec_item.label))
             };
 
-            print_warning(format!("Prerequisites for item {} are not met.", item_str).as_str());
+            print_nominal(format!("Prerequisites for item {} are not met.", item_str).as_str());
             continue;
         }
 
