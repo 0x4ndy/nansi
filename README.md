@@ -2,7 +2,7 @@
 `nansi` is a simple tool for task automation. Its primary functionality is to execute a sequence of commands in a defined order. It was inspired by what `Dockerfile` is and what `ansible` is not.
 
 ## Features
-- runnig commands
+- running commands
 - OS independent
 - indicates whether a command was executed successfully
 - allows for dependency creation; if command `B` is dependent on command `A`, and command `A` was not executed successfully, command `B` is skipped
