@@ -5,3 +5,6 @@
 ```
 nansi --help
 ```
+
+# Demo
+![](https://andy.codes/assets/img/nansi/nansi_demo.gif)
