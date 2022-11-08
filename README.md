@@ -7,10 +7,15 @@
 - indicates whether a command was executed successfully
 - allows for dependency creation; if command `B` is dependent on command `A`, and command `A` was not executed successfully, command `B` is skipped
 
-## Remarks
-`nansi` is OS independent so features related to a specific OS can be used by calling a specific shell. For instance, a command definition should look like:
+# Usage
+```
+nansi --help
+```
 
-- for Linux (bash):
+## Remarks
+`nansi` is OS independent so features related to a specific OS can be used by calling a specific shell. For instance, a command definition should look like in the following examples:
+
+- Linux (`bash`):
 ```
 "exec": "/bin/bash",
 "args": [
@@ -19,7 +24,7 @@
 ]
 ```
 
-- for Windows (cmd):
+- Windows (`cmd`):
 ```
 "exec": "cmd",
 "args": [
@@ -27,17 +32,13 @@
     "mkdir %homedrive%%homepath%/test"
 ]
 ```
-- for Windows (powershell):
+- Windows (`powershell`):
 ```
 "exec": "powershell",
 "args": [
     "-c",
     "mkdir $HOME/test"
 ]
-```
-# Usage
-```
-nansi --help
 ```
 
 # Demo
