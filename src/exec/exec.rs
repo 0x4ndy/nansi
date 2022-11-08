@@ -101,12 +101,8 @@ pub fn execute(nansi_file: &NansiFile) -> Result<(), Box<dyn Error>> {
                 print_status(&exec_item, idx + 1, exec_status);
             }
 
-            let item_str = if exec_item.label.is_empty() {
-                String::from(format!("[{}]", idx.to_string()))
-            } else {
-                String::from(format!("[{}][{}]", idx.to_string(), &exec_item.label))
-            };
-
+            let item_str = get_item_str(exec_item, idx);
+            
             print_nominal(format!("Prerequisites for item {} are not met.", item_str).as_str());
             continue;
         }
@@ -178,6 +174,16 @@ fn exec_meets_prerequisites(exec_item: &ExecItem, succ_label_list: &Vec<&str>) -
     true
 }
 
+fn get_item_str(exec_item: &ExecItem, idx: usize) -> String {
+    let item_str = if exec_item.label.is_empty() {
+        String::from(format!("[{}]", idx.to_string()))
+    } else {
+        String::from(format!("[{}][{}]", idx.to_string(), &exec_item.label))
+    };
+
+    item_str
+}
+
 fn print_status(exec_item: &ExecItem, idx: usize, exec_status: ExecStatus) {
     let status = match exec_status {
         ExecStatus::OK => String::from("[OK]").green().to_string(),
@@ -186,13 +192,15 @@ fn print_status(exec_item: &ExecItem, idx: usize, exec_status: ExecStatus) {
         ExecStatus::SKIP => String::from("[SKIP]".dark_yellow().to_string()),
     };
 
-    let item_str = if exec_item.label.is_empty() {
-        String::from(format!("[{}]", idx.to_string()))
-    } else {
-        String::from(format!("[{}][{}]", idx.to_string(), &exec_item.label))
-    };
+    let item_str = get_item_str(exec_item, idx);
 
-    println!("{} {} {} {}", status, item_str, exec_item.exec, exec_item.args.join(" "));
+    println!(
+        "{} {} {} {}",
+        status,
+        item_str,
+        exec_item.exec,
+        exec_item.args.join(" ")
+    );
 }
 
 #[allow(dead_code)]
