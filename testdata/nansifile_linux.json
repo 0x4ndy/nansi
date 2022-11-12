@@ -1,29 +1,8 @@
 {
     "exec_list": [
-        {
-            "label": "ls",
-            "exec": "ls"
-        },
-        {
-            "label": "l2",
-            "exec": "ls",
-            "args": [
-                "-12345"
-            ]
-        },
-        {
-            "label": "asd",
-            "exec": "aaa",
-            "print_output": true
-        },
-        {
-            "label": "bash",
-            "exec": "/bin/bash",
-            "args": [
-                "-c",
-                "ls -ltra | grep README"
-            ],
-            "print_output": true
-        }
+        {"label": "ls", "exec": "ls"},
+        {"label": "l2", "exec": "ls", "args": ["-12345"]},
+        {"label": "asd", "exec": "aaa", "print_output": true},
+        {"label": "bash", "exec": "/bin/bash", "args": ["-c", "ls -ltra | grep README"], "print_output": false}
     ]
 }

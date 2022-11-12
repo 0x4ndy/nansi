@@ -17,3 +17,7 @@ serde_json = "1.0"
 dirs = "4"
 clap = { version = "4", features = ["derive"] }
 crossterm = "0.24.0"
+
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "2.1"

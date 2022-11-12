@@ -26,15 +26,19 @@ pub struct ExecItem {
     pub prerequisites: Vec<String>,
 }
 
+/// Describes the structure and content of `NansiFile` file
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NansiFile {
+    /// List of `exec` items
     pub exec_list: Vec<ExecItem>,
 
+    /// Path to the `json` file based on which this struct was parsed
     #[serde(default = "default_as_empty_string")]
     pub file_path: String,
 }
 
 #[allow(dead_code)]
+#[derive(PartialEq)]
 enum ExecStatus {
     OK,
     ERR,
@@ -81,9 +85,9 @@ pub fn execute(nansi_file: &NansiFile) -> Result<(), Box<dyn Error>> {
 
     if duplicates.len() > 0 {
         let msg = format!(
-            "{}\n{}",
+            "{}\n{:?}",
             "The following aliases are duplicated which may cause issues with conditional execution:",
-            duplicates.join("\n")
+            duplicates
         )
         .to_string();
 
@@ -93,56 +97,61 @@ pub fn execute(nansi_file: &NansiFile) -> Result<(), Box<dyn Error>> {
     let mut succ_label_list: Vec<&str> = Vec::new();
 
     for (idx, exec_item) in nansi_file.exec_list.iter().enumerate() {
-        let mut exec_status = ExecStatus::ERR;
-
         if !exec_meets_prerequisites(&exec_item, &succ_label_list) {
-            exec_status = ExecStatus::SKIP;
+            let exec_status = ExecStatus::SKIP;
             if exec_item.print_status {
                 print_status(&exec_item, idx + 1, exec_status);
             }
 
             let item_str = get_item_str(exec_item, idx);
-            
+
             print_nominal(format!("Prerequisites for item {} are not met.", item_str).as_str());
             continue;
         }
 
-        match Command::new(&exec_item.exec).args(&exec_item.args).output() {
-            Ok(result) => {
-                if result.status.success() {
-                    exec_status = ExecStatus::OK;
-                    if !exec_item.label.is_empty()
-                        && !succ_label_list.contains(&exec_item.label.as_str())
-                    {
-                        succ_label_list.push(exec_item.label.as_str());
-                    }
-                }
+        let (exec_status, output) = run_exec(&exec_item)?;
 
-                if exec_item.print_status {
-                    print_status(&exec_item, idx + 1, exec_status);
-                }
+        if exec_status == ExecStatus::OK {
+            if !exec_item.label.is_empty() && !succ_label_list.contains(&exec_item.label.as_str()) {
+                succ_label_list.push(exec_item.label.as_str());
+            }
+        }
 
-                if exec_item.print_output {
-                    let output = if result.status.success() {
-                        String::from_utf8(result.stdout)?
-                    } else {
-                        String::from_utf8(result.stderr)?
-                    };
-                    print_nominal(&output);
-                }
-            }
-            Err(e) => {
-                if exec_item.print_status {
-                    print_status(exec_item, idx + 1, ExecStatus::ERR);
-                }
-                if exec_item.print_output {
-                    print_nominal(e.to_string().as_str());
-                }
-            }
-        };
+        if exec_item.print_status {
+            print_status(&exec_item, idx + 1, exec_status);
+        }
+
+        if exec_item.print_output {
+            print_nominal(&output);
+        }
     }
 
     Ok(())
+}
+
+fn run_exec(exec_item: &ExecItem) -> Result<(ExecStatus, String), Box<dyn Error>> {
+    let mut exec_status = ExecStatus::ERR;
+    let output: String;
+
+    match Command::new(&exec_item.exec).args(&exec_item.args).output() {
+        Ok(result) => {
+            if result.status.success() {
+                exec_status = ExecStatus::OK;
+            }
+
+            output = if result.status.success() {
+                String::from_utf8(result.stdout)?
+            } else {
+                String::from_utf8(result.stderr)?
+            };
+        }
+        Err(e) => {
+            exec_status = ExecStatus::ERR;
+            output = e.to_string();
+        }
+    };
+
+    Ok((exec_status, output))
 }
 
 fn get_label_duplicates(exec_list: &Vec<ExecItem>) -> Vec<&str> {
@@ -186,16 +195,16 @@ fn get_item_str(exec_item: &ExecItem, idx: usize) -> String {
 
 fn print_status(exec_item: &ExecItem, idx: usize, exec_status: ExecStatus) {
     let status = match exec_status {
-        ExecStatus::OK => String::from("[OK]").green().to_string(),
-        ExecStatus::ERR => String::from("[FAIL]".red().to_string()),
-        ExecStatus::WARN => String::from("[WARN]".yellow().to_string()),
-        ExecStatus::SKIP => String::from("[SKIP]".dark_yellow().to_string()),
+        ExecStatus::OK => String::from("OK").green().to_string(),
+        ExecStatus::ERR => String::from("FAIL".red().to_string()),
+        ExecStatus::WARN => String::from("WARN".yellow().to_string()),
+        ExecStatus::SKIP => String::from("SKIP".dark_yellow().to_string()),
     };
 
     let item_str = get_item_str(exec_item, idx);
 
     println!(
-        "{} {} {} {}",
+        "[{}] {} {} {}",
         status,
         item_str,
         exec_item.exec,

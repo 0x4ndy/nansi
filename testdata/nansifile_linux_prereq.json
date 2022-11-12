@@ -33,7 +33,7 @@
                 "-c",
                 "ls -ltra | grep README"
             ],
-            "print_output": true,
+            "print_output": false,
             "prerequisites": [
                 "l2"
             ]
