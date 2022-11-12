@@ -170,7 +170,10 @@ fn get_label_duplicates(exec_list: &Vec<ExecItem>) -> Vec<&str> {
     }
     exec_map.retain(|_, v| *v > 1);
 
-    exec_map.keys().cloned().collect()
+    let mut keys: Vec<&str> = exec_map.keys().cloned().collect();
+    keys.sort_by(|a, b| a.cmp(&b));
+    
+    keys
 }
 
 fn exec_meets_prerequisites(exec_item: &ExecItem, succ_label_list: &Vec<&str>) -> bool {
