@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::env;
 use std::error::Error;
 use std::process::Command;
 use std::{fs, io};
@@ -129,11 +130,63 @@ pub fn execute(nansi_file: &NansiFile) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+pub fn compile_arg(arg: &String) -> String {
+    let mut compiled_arg = String::from(arg);
+
+    let mut record = false;
+    let mut tag = String::from("");
+    let mut tags: Vec<String> = Vec::new();
+
+    for (i, c) in arg.chars().enumerate() {
+        match c {
+            '{' => {
+                if (i == 0)
+                    || (i > 0
+                        && arg.chars().nth(i - 1).unwrap() != '\\'
+                        && arg.chars().nth(i - 1).unwrap() != '$')
+                {
+                    if record {
+                        panic!("Incorrect number of {{");
+                    } else {
+                        record = true;
+                    }
+                }
+            }
+            '}' => {
+                if (i == 0) || (i > 0 && arg.chars().nth(i - 1).unwrap() != '\\') {
+                    if record {
+                        record = false;
+                        tags.push(tag.clone());
+                        tag.clear();
+                    }
+                }
+            }
+            _ => {
+                if record {
+                    tag.push(c);
+                }
+            }
+        }
+    }
+
+    for t in tags {
+        let tag = format!("{{{t}}}");
+        compiled_arg = compiled_arg.replace(tag.as_str(), env::var(t.as_str()).unwrap().as_str());
+    }
+
+    compiled_arg
+}
+
 fn run_exec(exec_item: &ExecItem) -> Result<(ExecStatus, String), Box<dyn Error>> {
     let mut exec_status = ExecStatus::ERR;
     let output: String;
 
-    match Command::new(&exec_item.exec).args(&exec_item.args).output() {
+    let mut args: Vec<String> = Vec::new();
+    for arg in &exec_item.args {
+        args.push(compile_arg(arg));
+    }
+
+    match Command::new(&exec_item.exec).args(&args).output() {
         Ok(result) => {
             if result.status.success() {
                 exec_status = ExecStatus::OK;
@@ -172,7 +225,7 @@ fn get_label_duplicates(exec_list: &Vec<ExecItem>) -> Vec<&str> {
 
     let mut keys: Vec<&str> = exec_map.keys().cloned().collect();
     keys.sort_by(|a, b| a.cmp(&b));
-    
+
     keys
 }
 
@@ -249,4 +302,30 @@ fn default_as_empty_vec_string() -> Vec<String> {
 
 fn default_as_empty_string() -> String {
     String::from("")
+}
+
+#[test]
+fn compile_arg_envvar_test() {
+    let arg = String::from("cat Cargo.toml | grep \"version = \\\"${TEST}\\\"\"");
+
+    env::set_var("TEST", "XYZ");
+
+    let compiled_arg = compile_arg(&arg);
+    assert_eq!(
+        compiled_arg.as_str(),
+        "cat Cargo.toml | grep \"version = \\\"${TEST}\\\"\""
+    );
+}
+
+#[test]
+fn compile_arg_var_test() {
+    let arg = String::from("cat Cargo.toml | grep \"version = \\\"{TEST}\\\"\"");
+
+    env::set_var("TEST", "XYZ");
+
+    let compiled_arg = compile_arg(&arg);
+    assert_eq!(
+        compiled_arg.as_str(),
+        "cat Cargo.toml | grep \"version = \\\"XYZ\\\"\""
+    );
 }

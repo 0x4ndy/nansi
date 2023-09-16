@@ -1,0 +1,6 @@
+{
+    "exec_list": [
+        {"label": "envvar", "exec": "/bin/sh", "args": ["-c", "cat Cargo.toml | grep \"version = \\\"${TEST}\\\"\""], "print_output": true},
+        {"label": "var", "exec": "echo", "args": ["{USER}"], "print_output": true}
+    ]
+}
