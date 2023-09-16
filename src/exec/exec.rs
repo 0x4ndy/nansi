@@ -130,7 +130,7 @@ pub fn execute(nansi_file: &NansiFile) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn compile_arg(arg: &String) -> String {
+pub fn compile_arg(arg: &String) -> Result<String, Box<dyn Error>> {
     let mut compiled_arg = String::from(arg);
 
     let mut record = false;
@@ -146,10 +146,9 @@ pub fn compile_arg(arg: &String) -> String {
                         && arg.chars().nth(i - 1).unwrap() != '$')
                 {
                     if record {
-                        panic!("Incorrect number of {{");
-                    } else {
-                        record = true;
+                        return Err("Incorrect number of environment variable tags '{{'")?;
                     }
+                    record = true;
                 }
             }
             '}' => {
@@ -174,7 +173,7 @@ pub fn compile_arg(arg: &String) -> String {
         compiled_arg = compiled_arg.replace(tag.as_str(), env::var(t.as_str()).unwrap().as_str());
     }
 
-    compiled_arg
+    Ok(compiled_arg)
 }
 
 fn run_exec(exec_item: &ExecItem) -> Result<(ExecStatus, String), Box<dyn Error>> {
@@ -183,7 +182,7 @@ fn run_exec(exec_item: &ExecItem) -> Result<(ExecStatus, String), Box<dyn Error>
 
     let mut args: Vec<String> = Vec::new();
     for arg in &exec_item.args {
-        args.push(compile_arg(arg));
+        args.push(compile_arg(arg)?);
     }
 
     match Command::new(&exec_item.exec).args(&args).output() {
