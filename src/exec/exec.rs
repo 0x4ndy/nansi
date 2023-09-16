@@ -309,7 +309,7 @@ fn compile_arg_envvar_test() {
 
     env::set_var("TEST", "XYZ");
 
-    let compiled_arg = compile_arg(&arg);
+    let compiled_arg = compile_arg(&arg).unwrap();
     assert_eq!(
         compiled_arg.as_str(),
         "cat Cargo.toml | grep \"version = \\\"${TEST}\\\"\""
@@ -322,7 +322,7 @@ fn compile_arg_var_test() {
 
     env::set_var("TEST", "XYZ");
 
-    let compiled_arg = compile_arg(&arg);
+    let compiled_arg = compile_arg(&arg).unwrap();
     assert_eq!(
         compiled_arg.as_str(),
         "cat Cargo.toml | grep \"version = \\\"XYZ\\\"\""
